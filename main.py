@@ -36,6 +36,7 @@ files_destinations = {
     ".accdb": "D:\\Download too\\From Telegram\\Access Database Files",
 }
 
+
 # Function to get user input from the entry widget
 def user_input():
     global myInput
@@ -56,6 +57,7 @@ def on_click_outside(event):
     global text_state
     if event.widget != output:  # Check if the click event is not on the Text widget
         text_state = False
+
 # Function to move files from source directory to respective destination directories
 def move_files(source):
     global messages
@@ -84,11 +86,11 @@ def move_files(source):
                     except Exception as r:
                         messages.append("Failed to move " + files + ": " + str(r))
     except Exception as y:
-            time.sleep(1)
-            messagebox.showinfo("There is something wrong...","ERROR: (Incorrect directory or doesn't exist!)\n"+ str(y))
-            keyboard.add_hotkey('enter', stopKey)
-            time.sleep(1)
-            
+        messagebox.showerror("There is something wrong...","ERROR: (Incorrect directory or doesn't exist!)\n"+ str(y))
+        time.sleep(1)
+                
+
+
 # Function to stop key press event
 def stopKey():
     pass                
@@ -102,9 +104,8 @@ def browseFolder():
 
 # Function to update canvas with messages
 def update_canvas(messages):
-    for message in enumerate(messages):
+    for i, message in enumerate(messages):
         output.configure(state=tk.NORMAL)
-        output.delete("1.0", tk.END)
         output.insert("1.0", f"{message}\n")
         output.configure(state=tk.DISABLED)
 
@@ -113,13 +114,19 @@ def driveChecking():
     driveLetters = set("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     global saved
     saved = editInput
-
+    
     if saved in driveLetters:
         global new_files_destinations
-        new_files_destinations = {
-            key: value.replace("D:\\Download too\\From Telegram", f"{saved}:\\Download too\\From Telegram")
-            for key, value in files_destinations.items()
-        }
+        if not comboBox.get():
+            messagebox.showerror("Error", "The directory letter cannot be empty!")
+            time.sleep(1)
+        else:
+            new_files_destinations = {
+                key: value.replace("D:\\Download too\\From Telegram", f"{saved}:\\Download too\\From Telegram")
+                for key, value in files_destinations.items()
+            }
+            messagebox.showinfo("Saved!",f"Settings has been saved!")
+            time.sleep(1)
 
 # Setting up the main Tkinter window
 root = Tk()
@@ -160,7 +167,8 @@ tabControl.pack(expand=0, fill="both")
 
 # Wrapper function to get user input, move files, and update canvas
 def wrap_move_files():
-    if tabControl.index(tabControl.select()) != 0 or text_state == True: return
+    if tabControl.index(tabControl.select()) != 0 or text_state:
+        return  # Exit function if conditions are not met
     user_input()
     source = myInput
     move_files(source)
@@ -230,6 +238,8 @@ saveButton.grid(row=2,column=0, columnspan=2, pady=10, sticky='n')
 # Adding a canvas to display messages
 canvas = tk.Canvas(tab1,height=300,width=900)
 canvas.pack(padx=20, pady=20)
+
+
 
 # Keyboard function when pressed "Enter" it will activate functions
 keyboard.add_hotkey('enter',lambda:(wrap_move_files(),wrap_save_settings()))
